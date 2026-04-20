@@ -104,15 +104,14 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
     agreeToTerms: false,
   });
 
-  // Generate mock flights
+  // Generate mock flights with fixed prices
   const generateFlights = (date: string, isReturn: boolean): Flight[] => {
-    const basePrice = 2200;
     const times = [
-      { dept: "06:00", arr: "07:30" },
-      { dept: "09:15", arr: "10:45" },
-      { dept: "12:30", arr: "14:00" },
-      { dept: "15:45", arr: "17:15" },
-      { dept: "18:30", arr: "20:00" },
+      { dept: "06:00", arr: "07:30", price: 2150 },
+      { dept: "09:15", arr: "10:45", price: 2380 },
+      { dept: "12:30", arr: "14:00", price: 2290 },
+      { dept: "15:45", arr: "17:15", price: 2450 },
+      { dept: "18:30", arr: "20:00", price: 2220 },
     ];
 
     return times.map((time, idx) => ({
@@ -122,7 +121,7 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
       arrival: isReturn ? searchParams.from.split(' ')[0] : searchParams.to.split(' ')[0],
       departureTime: time.dept,
       arrivalTime: time.arr,
-      price: basePrice + (idx * 100) - (Math.random() * 200),
+      price: time.price,
       date,
     }));
   };
@@ -217,7 +216,7 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
               />
             ))}
           </div>
-          <div className="flex justify-between mt-3 text-xs text-gray-600">
+          <div className="hidden sm:flex justify-between mt-3 text-xs text-gray-600">
             <span>Select Flight</span>
             <span>Return Flight</span>
             <span>Bundles</span>
@@ -240,34 +239,34 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
               transition={{ duration: 0.3 }}
             >
               <div className="mb-6">
-                <h2 className="text-2xl mb-2 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
+                <h2 className="text-xl sm:text-2xl mb-2 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
                   Select Departure Flight
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   {searchParams.from} → {searchParams.to}
                 </p>
               </div>
 
               {/* Date Strip */}
               <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
-                <div className="flex overflow-x-auto">
+                <div className="flex overflow-x-auto scrollbar-hide">
                   {departDateOptions.map((date, idx) => {
                     const isSelected = date.toISOString().split('T')[0] === searchParams.departDate;
                     return (
                       <button
                         key={idx}
-                        className={`flex-1 min-w-[100px] py-4 px-3 text-center border-b-2 transition-colors ${
+                        className={`flex-1 min-w-[80px] sm:min-w-[100px] py-3 sm:py-4 px-2 sm:px-3 text-center border-b-2 transition-colors ${
                           isSelected
                             ? 'border-[var(--isla-turquoise)] bg-[var(--isla-turquoise)]/5'
                             : 'border-transparent hover:bg-gray-50'
                         }`}
                       >
                         <div className="text-xs text-gray-500">{formatDateDay(date)}</div>
-                        <div className={`text-sm ${isSelected ? 'text-[var(--isla-turquoise)]' : ''}`} style={{ fontWeight: isSelected ? 600 : 400 }}>
+                        <div className={`text-xs sm:text-sm ${isSelected ? 'text-[var(--isla-turquoise)]' : ''}`} style={{ fontWeight: isSelected ? 600 : 400 }}>
                           {formatDateShort(date)}
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
-                          ₱{(2200 + Math.random() * 500).toFixed(0)}
+                          ₱2,290
                         </div>
                       </button>
                     );
@@ -281,55 +280,58 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
                   <motion.div
                     key={flight.id}
                     whileHover={{ scale: 1.01 }}
-                    className={`bg-white rounded-xl shadow-sm p-6 cursor-pointer border-2 transition-all ${
+                    className={`bg-white rounded-xl shadow-sm p-4 sm:p-6 cursor-pointer border-2 transition-all ${
                       selectedDepartFlight?.id === flight.id
                         ? 'border-[var(--isla-turquoise)] ring-2 ring-[var(--isla-turquoise)]/20'
                         : 'border-transparent hover:shadow-md'
                     }`}
                     onClick={() => setSelectedDepartFlight(flight)}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-6 flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      {/* Flight Times - Horizontal on all screens */}
+                      <div className="flex items-center gap-3 sm:gap-6 flex-1">
                         {/* Departure Time */}
-                        <div className="text-center">
-                          <div className="text-2xl text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
+                        <div className="text-center flex-shrink-0">
+                          <div className="text-xl sm:text-2xl text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
                             {flight.departureTime}
                           </div>
-                          <div className="text-sm text-gray-600">{flight.departure}</div>
+                          <div className="text-xs sm:text-sm text-gray-600">{flight.departure}</div>
                         </div>
 
                         {/* Flight Icon */}
-                        <div className="flex-1 flex items-center justify-center px-4">
-                          <div className="flex items-center gap-2 text-gray-400">
+                        <div className="flex-1 flex items-center justify-center px-2 sm:px-4">
+                          <div className="flex items-center gap-2 text-gray-400 w-full">
                             <div className="h-px bg-gray-300 flex-1" />
-                            <Plane className="w-5 h-5 rotate-90" />
+                            <Plane className="w-4 h-4 sm:w-5 sm:h-5 rotate-90 flex-shrink-0" />
                             <div className="h-px bg-gray-300 flex-1" />
                           </div>
                         </div>
 
                         {/* Arrival Time */}
-                        <div className="text-center">
-                          <div className="text-2xl text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
+                        <div className="text-center flex-shrink-0">
+                          <div className="text-xl sm:text-2xl text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
                             {flight.arrivalTime}
                           </div>
-                          <div className="text-sm text-gray-600">{flight.arrival}</div>
+                          <div className="text-xs sm:text-sm text-gray-600">{flight.arrival}</div>
                         </div>
                       </div>
 
                       {/* Price & Selection */}
-                      <div className="ml-8 text-right">
-                        <div className="text-xs text-gray-500 mb-1">All-in Fare</div>
-                        <div className="text-2xl text-[var(--isla-orange)] mb-2" style={{ fontWeight: 600 }}>
-                          ₱{flight.price.toFixed(2)}
+                      <div className="flex items-center justify-between sm:flex-col sm:items-end sm:ml-8 sm:text-right border-t sm:border-t-0 pt-3 sm:pt-0">
+                        <div className="flex flex-col">
+                          <div className="text-xs text-gray-500 mb-1">All-in Fare</div>
+                          <div className="text-xl sm:text-2xl text-[var(--isla-orange)] mb-1" style={{ fontWeight: 600 }}>
+                            ₱{flight.price.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-gray-500 mb-2">{flight.flightNumber}</div>
                         </div>
-                        <div className="text-xs text-gray-500 mb-2">{flight.flightNumber}</div>
                         {selectedDepartFlight?.id === flight.id ? (
-                          <div className="flex items-center justify-end gap-2 text-[var(--isla-turquoise)]">
-                            <Check className="w-5 h-5" />
+                          <div className="flex items-center gap-2 text-[var(--isla-turquoise)] sm:justify-end">
+                            <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                             <span className="text-sm" style={{ fontWeight: 500 }}>Selected</span>
                           </div>
                         ) : (
-                          <button className="text-sm text-[var(--isla-turquoise)] hover:underline">
+                          <button className="text-sm text-[var(--isla-turquoise)] hover:underline px-4 py-2">
                             Select
                           </button>
                         )}
@@ -351,34 +353,34 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
               transition={{ duration: 0.3 }}
             >
               <div className="mb-6">
-                <h2 className="text-2xl mb-2 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
+                <h2 className="text-xl sm:text-2xl mb-2 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
                   Select Return Flight
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   {searchParams.to} → {searchParams.from}
                 </p>
               </div>
 
               {/* Date Strip */}
               <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
-                <div className="flex overflow-x-auto">
+                <div className="flex overflow-x-auto scrollbar-hide">
                   {returnDateOptions.map((date, idx) => {
                     const isSelected = date.toISOString().split('T')[0] === searchParams.returnDate;
                     return (
                       <button
                         key={idx}
-                        className={`flex-1 min-w-[100px] py-4 px-3 text-center border-b-2 transition-colors ${
+                        className={`flex-1 min-w-[80px] sm:min-w-[100px] py-3 sm:py-4 px-2 sm:px-3 text-center border-b-2 transition-colors ${
                           isSelected
                             ? 'border-[var(--isla-turquoise)] bg-[var(--isla-turquoise)]/5'
                             : 'border-transparent hover:bg-gray-50'
                         }`}
                       >
                         <div className="text-xs text-gray-500">{formatDateDay(date)}</div>
-                        <div className={`text-sm ${isSelected ? 'text-[var(--isla-turquoise)]' : ''}`} style={{ fontWeight: isSelected ? 600 : 400 }}>
+                        <div className={`text-xs sm:text-sm ${isSelected ? 'text-[var(--isla-turquoise)]' : ''}`} style={{ fontWeight: isSelected ? 600 : 400 }}>
                           {formatDateShort(date)}
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
-                          ₱{(2200 + Math.random() * 500).toFixed(0)}
+                          ₱2,290
                         </div>
                       </button>
                     );
@@ -392,51 +394,58 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
                   <motion.div
                     key={flight.id}
                     whileHover={{ scale: 1.01 }}
-                    className={`bg-white rounded-xl shadow-sm p-6 cursor-pointer border-2 transition-all ${
+                    className={`bg-white rounded-xl shadow-sm p-4 sm:p-6 cursor-pointer border-2 transition-all ${
                       selectedReturnFlight?.id === flight.id
                         ? 'border-[var(--isla-turquoise)] ring-2 ring-[var(--isla-turquoise)]/20'
                         : 'border-transparent hover:shadow-md'
                     }`}
                     onClick={() => setSelectedReturnFlight(flight)}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-6 flex-1">
-                        <div className="text-center">
-                          <div className="text-2xl text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      {/* Flight Times - Horizontal on all screens */}
+                      <div className="flex items-center gap-3 sm:gap-6 flex-1">
+                        {/* Departure Time */}
+                        <div className="text-center flex-shrink-0">
+                          <div className="text-xl sm:text-2xl text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
                             {flight.departureTime}
                           </div>
-                          <div className="text-sm text-gray-600">{flight.departure}</div>
+                          <div className="text-xs sm:text-sm text-gray-600">{flight.departure}</div>
                         </div>
 
-                        <div className="flex-1 flex items-center justify-center px-4">
-                          <div className="flex items-center gap-2 text-gray-400">
+                        {/* Flight Icon */}
+                        <div className="flex-1 flex items-center justify-center px-2 sm:px-4">
+                          <div className="flex items-center gap-2 text-gray-400 w-full">
                             <div className="h-px bg-gray-300 flex-1" />
-                            <Plane className="w-5 h-5 rotate-90" />
+                            <Plane className="w-4 h-4 sm:w-5 sm:h-5 rotate-90 flex-shrink-0" />
                             <div className="h-px bg-gray-300 flex-1" />
                           </div>
                         </div>
 
-                        <div className="text-center">
-                          <div className="text-2xl text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
+                        {/* Arrival Time */}
+                        <div className="text-center flex-shrink-0">
+                          <div className="text-xl sm:text-2xl text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
                             {flight.arrivalTime}
                           </div>
-                          <div className="text-sm text-gray-600">{flight.arrival}</div>
+                          <div className="text-xs sm:text-sm text-gray-600">{flight.arrival}</div>
                         </div>
                       </div>
 
-                      <div className="ml-8 text-right">
-                        <div className="text-xs text-gray-500 mb-1">All-in Fare</div>
-                        <div className="text-2xl text-[var(--isla-orange)] mb-2" style={{ fontWeight: 600 }}>
-                          ₱{flight.price.toFixed(2)}
+                      {/* Price & Selection */}
+                      <div className="flex items-center justify-between sm:flex-col sm:items-end sm:ml-8 sm:text-right border-t sm:border-t-0 pt-3 sm:pt-0">
+                        <div className="flex flex-col">
+                          <div className="text-xs text-gray-500 mb-1">All-in Fare</div>
+                          <div className="text-xl sm:text-2xl text-[var(--isla-orange)] mb-1" style={{ fontWeight: 600 }}>
+                            ₱{flight.price.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-gray-500 mb-2">{flight.flightNumber}</div>
                         </div>
-                        <div className="text-xs text-gray-500 mb-2">{flight.flightNumber}</div>
                         {selectedReturnFlight?.id === flight.id ? (
-                          <div className="flex items-center justify-end gap-2 text-[var(--isla-turquoise)]">
-                            <Check className="w-5 h-5" />
+                          <div className="flex items-center gap-2 text-[var(--isla-turquoise)] sm:justify-end">
+                            <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                             <span className="text-sm" style={{ fontWeight: 500 }}>Selected</span>
                           </div>
                         ) : (
-                          <button className="text-sm text-[var(--isla-turquoise)] hover:underline">
+                          <button className="text-sm text-[var(--isla-turquoise)] hover:underline px-4 py-2">
                             Select
                           </button>
                         )}
@@ -458,10 +467,10 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
               transition={{ duration: 0.3 }}
             >
               <div className="mb-6">
-                <h2 className="text-2xl mb-2 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
+                <h2 className="text-xl sm:text-2xl mb-2 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
                   Choose Your Bundle
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   Select the best option for your journey
                 </p>
               </div>
@@ -471,7 +480,7 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
                   <motion.div
                     key={bundle.id}
                     whileHover={{ scale: 1.02 }}
-                    className={`bg-white rounded-xl shadow-sm p-6 cursor-pointer border-2 transition-all relative ${
+                    className={`bg-white rounded-xl shadow-sm p-4 sm:p-6 cursor-pointer border-2 transition-all relative ${
                       selectedBundle === bundle.id
                         ? 'border-[var(--isla-turquoise)] ring-2 ring-[var(--isla-turquoise)]/20'
                         : 'border-gray-200 hover:shadow-md'
@@ -525,10 +534,10 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
               </div>
 
               {/* WavePoints Info */}
-              <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-                <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex items-start gap-3">
+                <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-blue-900">
+                  <p className="text-xs sm:text-sm text-blue-900">
                     <span style={{ fontWeight: 600 }}>Earn WavePoints!</span> Select Isla Value or Isla Flex to earn points on this booking that you can redeem for future flights.
                   </p>
                 </div>
@@ -546,16 +555,16 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
               transition={{ duration: 0.3 }}
             >
               <div className="mb-6">
-                <h2 className="text-2xl mb-2 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
+                <h2 className="text-xl sm:text-2xl mb-2 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
                   Guest Details
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   Please ensure the name matches your government-issued ID
                 </p>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6 max-w-2xl">
-                <div className="space-y-6">
+              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 max-w-2xl">
+                <div className="space-y-4 sm:space-y-6">
                   {/* Title */}
                   <div>
                     <label className="block mb-2 text-gray-700" style={{ fontWeight: 500 }}>
@@ -701,16 +710,16 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
               transition={{ duration: 0.3 }}
             >
               <div className="mb-6">
-                <h2 className="text-2xl mb-2 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
+                <h2 className="text-xl sm:text-2xl mb-2 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
                   Contact Information
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   We'll send your booking confirmation here
                 </p>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6 max-w-2xl">
-                <div className="space-y-6">
+              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 max-w-2xl">
+                <div className="space-y-4 sm:space-y-6">
                   {/* Use Guest Details Toggle */}
                   <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                     <input
@@ -810,37 +819,37 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
               </div>
 
               {/* Booking Summary */}
-              <div className="mt-6 bg-white rounded-xl shadow-sm p-6 max-w-2xl">
-                <h3 className="text-lg mb-4 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
+              <div className="mt-6 bg-white rounded-xl shadow-sm p-4 sm:p-6 max-w-2xl">
+                <h3 className="text-base sm:text-lg mb-4 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 600 }}>
                   Booking Summary
                 </h3>
-                <div className="space-y-3 text-sm">
+                <div className="space-y-3 text-xs sm:text-sm">
                   <div className="flex justify-between py-2 border-b border-gray-100">
                     <span className="text-gray-600">Outbound Flight</span>
                     <span className="text-gray-900" style={{ fontWeight: 500 }}>
-                      ₱{selectedDepartFlight?.price.toFixed(2)}
+                      ₱{selectedDepartFlight?.price.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-gray-100">
                     <span className="text-gray-600">Return Flight</span>
                     <span className="text-gray-900" style={{ fontWeight: 500 }}>
-                      ₱{selectedReturnFlight?.price.toFixed(2)}
+                      ₱{selectedReturnFlight?.price.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-gray-100">
                     <span className="text-gray-600">Bundle ({bundles.find(b => b.id === selectedBundle)?.name})</span>
                     <span className="text-gray-900" style={{ fontWeight: 500 }}>
-                      ₱{(bundles.find(b => b.id === selectedBundle)?.price || 0) * searchParams.passengers}
+                      ₱{((bundles.find(b => b.id === selectedBundle)?.price || 0) * searchParams.passengers).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between py-3 pt-4">
                     <span className="text-gray-900" style={{ fontWeight: 600 }}>Total Amount</span>
-                    <span className="text-2xl text-[var(--isla-orange)]" style={{ fontWeight: 600 }}>
+                    <span className="text-xl sm:text-2xl text-[var(--isla-orange)]" style={{ fontWeight: 600 }}>
                       ₱{(
                         (selectedDepartFlight?.price || 0) +
                         (selectedReturnFlight?.price || 0) +
                         ((bundles.find(b => b.id === selectedBundle)?.price || 0) * searchParams.passengers)
-                      ).toFixed(2)}
+                      ).toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -850,11 +859,11 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
         </AnimatePresence>
 
         {/* Continue Button */}
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex justify-center px-4">
           <button
             onClick={handleContinue}
             disabled={!canContinue()}
-            className={`px-12 py-4 rounded-full text-lg transition-all ${
+            className={`w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 rounded-full text-base sm:text-lg transition-all ${
               canContinue()
                 ? 'bg-[var(--isla-orange)] text-white hover:bg-[var(--isla-orange)]/90 hover:scale-[1.02]'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -881,7 +890,7 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative"
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 relative mx-4"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -892,17 +901,17 @@ export function BookingFlowPage({ searchParams, onBack }: Props) {
               </button>
 
               <div className="text-center">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Check className="w-10 h-10 text-green-600" />
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                  <Check className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
                 </div>
 
-                <h3 className="text-2xl mb-3 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 700 }}>
+                <h3 className="text-xl sm:text-2xl mb-3 text-[var(--isla-turquoise-dark)]" style={{ fontWeight: 700 }}>
                   Booking Confirmed!
                 </h3>
 
-                <p className="text-gray-600 mb-6">
+                <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
                   Your flight has been successfully booked. A confirmation email has been sent to{' '}
-                  <span style={{ fontWeight: 600 }}>{contactDetails.email}</span>
+                  <span style={{ fontWeight: 600 }} className="break-all">{contactDetails.email}</span>
                 </p>
 
                 <div className="bg-[var(--isla-sand)] rounded-lg p-4 mb-6 text-left">
